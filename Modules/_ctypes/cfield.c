@@ -1605,7 +1605,11 @@ static struct fielddesc formattable[] = {
     { 'B', B_set, B_get, &ffi_type_uchar},
     { 'c', c_set, c_get, &ffi_type_schar},
     { 'd', d_set, d_get, &ffi_type_double, d_set_sw, d_get_sw},
+#ifdef _WIN32
+    { 'g', d_set, d_get, &ffi_type_double, d_set_sw, d_get_sw},
+#else
     { 'g', g_set, g_get, &ffi_type_longdouble},
+#endif
     { 'f', f_set, f_get, &ffi_type_float, f_set_sw, f_get_sw},
     { 'h', h_set, h_get, &ffi_type_sshort, h_set_sw, h_get_sw},
     { 'H', H_set, H_get, &ffi_type_ushort, H_set_sw, H_get_sw},
@@ -1692,7 +1696,9 @@ typedef struct { char c; int x; } s_int;
 typedef struct { char c; long x; } s_long;
 typedef struct { char c; float x; } s_float;
 typedef struct { char c; double x; } s_double;
+#ifndef _WIN32
 typedef struct { char c; long double x; } s_long_double;
+#endif
 typedef struct { char c; char *x; } s_char_p;
 typedef struct { char c; void *x; } s_void_p;
 
@@ -1704,7 +1710,9 @@ typedef struct { char c; void *x; } s_void_p;
 #define INT_ALIGN (sizeof(s_int) - sizeof(int))
 #define FLOAT_ALIGN (sizeof(s_float) - sizeof(float))
 #define DOUBLE_ALIGN (sizeof(s_double) - sizeof(double))
+#ifndef _WIN32
 #define LONGDOUBLE_ALIGN (sizeof(s_long_double) - sizeof(long double))
+#endif
 
 /* #define CHAR_P_ALIGN (sizeof(s_char_p) - sizeof(char*)) */
 #define VOID_P_ALIGN (sizeof(s_void_p) - sizeof(void*))
@@ -1752,13 +1760,14 @@ ffi_type ffi_type_sint64 = { 8, LONG_LONG_ALIGN, FFI_TYPE_SINT64 };
 ffi_type ffi_type_float = { sizeof(float), FLOAT_ALIGN, FFI_TYPE_FLOAT };
 ffi_type ffi_type_double = { sizeof(double), DOUBLE_ALIGN, FFI_TYPE_DOUBLE };
 
+#ifndef _WIN32
 #ifdef ffi_type_longdouble
 #undef ffi_type_longdouble
 #endif
   /* This is already defined on OSX */
 ffi_type ffi_type_longdouble = { sizeof(long double), LONGDOUBLE_ALIGN,
                                  FFI_TYPE_LONGDOUBLE };
-
+#endif
 ffi_type ffi_type_pointer = { sizeof(void *), VOID_P_ALIGN, FFI_TYPE_POINTER };
 
 /*---------------- EOF ----------------*/
