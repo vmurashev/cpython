@@ -1,7 +1,7 @@
 import __future__
 import os
 import unittest
-import distutils.dir_util
+import shutil
 import tempfile
 
 from test import test_support
@@ -203,10 +203,17 @@ a/module.py
                                 from . import bar
 """]
 
+
+def _mkpath(name, mode=0777):
+    name = os.path.normpath(name)
+    if os.path.isdir(name) or name == '':
+        return
+    os.makedirs(name , mode)
+
 def open_file(path):
     ##print "#", os.path.abspath(path)
     dirname = os.path.dirname(path)
-    distutils.dir_util.mkpath(dirname)
+    _mkpath(dirname)
     return open(path, "w")
 
 def create_package(source):
@@ -253,7 +260,7 @@ class ModuleFinderTest(unittest.TestCase):
             self.assertEqual(bad, missing)
             self.assertEqual(maybe, maybe_missing)
         finally:
-            distutils.dir_util.remove_tree(TEST_DIR)
+            shutil.rmtree(TEST_DIR)
 
     def test_package(self):
         self._do_test(package_test)
@@ -292,7 +299,6 @@ b.py
         self._do_test(extended_opargs_test)
 
 def test_main():
-    distutils.log.set_threshold(distutils.log.WARN)
     test_support.run_unittest(ModuleFinderTest)
 
 if __name__ == "__main__":

@@ -9,7 +9,6 @@ import os
 import os.path
 import errno
 import subprocess
-from distutils.spawn import find_executable
 from shutil import (make_archive,
                     register_archive_format, unregister_archive_format,
                     get_archive_formats)
@@ -20,6 +19,15 @@ from test import test_support as support
 from test.test_support import TESTFN, check_warnings, captured_stdout
 
 TESTFN2 = TESTFN + "2"
+
+
+def find_executable(name):
+    try:
+        import distutils.spawn
+        return distutils.spawn.find_executable(name)
+    except ImportError:
+        return None
+
 
 try:
     import grp
