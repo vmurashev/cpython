@@ -534,7 +534,7 @@ _PyInt_FromDev(PY_LONG_LONG v)
 #endif
 
 
-#if defined _MSC_VER && _MSC_VER >= 1400
+#if defined _MSC_VER && _MSC_VER >= 1400  && _MSC_VER < 1900
 /* Microsoft CRT in VS2005 and higher will verify that a filehandle is
  * valid and raise an assertion if it isn't.
  * Normally, an invalid fd is likely to be a C program error and therefore
@@ -621,6 +621,16 @@ _PyVerify_fd_dup2(int fd1, int fd2)
         return 1;
     else
         return 0;
+}
+#elif defined _MSC_VER && _MSC_VER >= 1200
+#define _PyVerify_fd_dup2(A, B) (1)
+
+int _PyVerify_fd(int fd) {
+    int r;
+    _Py_BEGIN_SUPPRESS_IPH
+    r = (_get_osfhandle(fd) >= 0);
+    _Py_END_SUPPRESS_IPH
+    return r;
 }
 #else
 /* dummy version. _PyVerify_fd() is already defined in fileobject.h */
@@ -1228,7 +1238,9 @@ win32_fstat(int file_number, struct win32_stat *result)
     HANDLE h;
     int type;
 
+    _Py_BEGIN_SUPPRESS_IPH
     h = (HANDLE)_get_osfhandle(file_number);
+    _Py_END_SUPPRESS_IPH
 
     /* Protocol violation: we explicitly clear errno, instead of
        setting it to a POSIX error. Callers should use GetLastError. */
@@ -6718,7 +6730,9 @@ posix_dup2(PyObject *self, PyObject *args)
     if (!_PyVerify_fd_dup2(fd, fd2))
         return posix_error();
     Py_BEGIN_ALLOW_THREADS
+    _Py_BEGIN_SUPPRESS_IPH
     res = dup2(fd, fd2);
+    _Py_END_SUPPRESS_IPH
     Py_END_ALLOW_THREADS
     if (res < 0)
         return posix_error();
