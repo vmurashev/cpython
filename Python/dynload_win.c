@@ -18,11 +18,7 @@ void _Py_DeactivateActCtx(ULONG_PTR cookie);
 #endif
 
 const struct filedescr _PyImport_DynLoadFiletab[] = {
-#ifdef _DEBUG
-    {"_d.pyd", "rb", C_EXTENSION},
-#else
     {".pyd", "rb", C_EXTENSION},
-#endif
     {0, 0}
 };
 
@@ -139,11 +135,7 @@ static char *GetPythonImport (HINSTANCE hModule)
                 /* Ensure python prefix is followed only
                    by numbers to the end of the basename */
                 pch = import_name + 6;
-#ifdef _DEBUG
-                while (*pch && pch[0] != '_' && pch[1] != 'd' && pch[2] != '.') {
-#else
                 while (*pch && *pch != '.') {
-#endif
                     if (*pch >= '0' && *pch <= '9') {
                         pch++;
                     } else {
@@ -256,11 +248,7 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *fqname, const char *shortname,
         } else {
             char buffer[256];
 
-#ifdef _DEBUG
-            PyOS_snprintf(buffer, sizeof(buffer), "python%d%d_d.dll",
-#else
             PyOS_snprintf(buffer, sizeof(buffer), "python%d%d.dll",
-#endif
                           PY_MAJOR_VERSION,PY_MINOR_VERSION);
             import_python = GetPythonImport(hDLL);
 
