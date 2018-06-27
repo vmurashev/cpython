@@ -150,13 +150,14 @@ class Callbacks(unittest.TestCase):
                 gc.collect()
         CFUNCTYPE(None)(lambda x=Nasty(): None)
 
-
-@need_symbol('WINFUNCTYPE')
-class StdcallCallbacks(Callbacks):
-    try:
-        functype = WINFUNCTYPE
-    except NameError:
-        pass
+import sys
+if 'MSC' in sys.version:
+    @need_symbol('WINFUNCTYPE')
+    class StdcallCallbacks(Callbacks):
+        try:
+            functype = WINFUNCTYPE
+        except NameError:
+            pass
 
 ################################################################
 

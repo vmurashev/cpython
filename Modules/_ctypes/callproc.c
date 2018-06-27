@@ -64,6 +64,7 @@
 #include "structmember.h"
 
 #ifdef MS_WIN32
+#define INITGUID
 #include <windows.h>
 #include <tchar.h>
 #else

@@ -1,6 +1,7 @@
 from test.test_support import run_unittest, cpython_only
 from test.test_math import parse_testfile, test_file
 import unittest
+import sys
 import cmath, math
 from cmath import phase, polar, rect, pi
 
@@ -318,6 +319,8 @@ class CMathTests(unittest.TestCase):
                 except OverflowError:
                     continue
                 else:
+                    if sys.platform == "win32" and 'MSC' not in sys.version:
+                        continue
                     self.fail('OverflowError not raised in test '
                           '{}: {}(complex({!r}, {!r}))'.format(id, fn, ar, ai))
 

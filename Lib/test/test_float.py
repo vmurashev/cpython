@@ -729,6 +729,20 @@ class ReprTestCase(unittest.TestCase):
             '0.0001',
             '9.999999999999e-05',
             '1e-05',
+            ]
+
+        for s in test_strings:
+            negs = '-'+s
+            self.assertEqual(s, repr(float(s)))
+            self.assertEqual(negs, repr(float(negs)))
+
+
+    @unittest.skipUnless(getattr(sys, 'float_repr_style', '') == 'short',
+                         "applies only when using short float repr style")
+    @unittest.skipIf(sys.platform == "win32" and 'MSC' not in sys.version and struct.calcsize("P") == 4,
+                         "not applicable for MinGW i686")
+    def test_short_repr_provoke(self):
+        test_strings = [
             # values designed to provoke failure if the FPU rounding
             # precision isn't set correctly
             '8.72293771110361e+25',

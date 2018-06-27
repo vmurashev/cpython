@@ -9,6 +9,7 @@ import _ctypes_test
 
 # Only windows 32-bit has different calling conventions.
 @unittest.skipUnless(sys.platform == "win32", 'Windows-specific test')
+@unittest.skipUnless('MSC' in sys.version, "SEH only supported by MSC")
 @unittest.skipUnless(sizeof(c_void_p) == sizeof(c_int),
                      "sizeof c_void_p and c_int differ")
 class WindowsTestCase(unittest.TestCase):

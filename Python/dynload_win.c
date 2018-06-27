@@ -26,6 +26,7 @@ const struct filedescr _PyImport_DynLoadFiletab[] = {
 /* Case insensitive string compare, to avoid any dependencies on particular
    C RTL implementations */
 
+#ifndef __MINGW32__
 static int strcasecmp (char *string1, char *string2)
 {
     int first, second;
@@ -39,7 +40,7 @@ static int strcasecmp (char *string1, char *string2)
 
     return (first - second);
 }
-
+#endif
 
 /* Function to return the name of the "python" DLL that the supplied module
    directly imports.  Looks through the list of imported modules and

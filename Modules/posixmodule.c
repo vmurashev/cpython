@@ -137,6 +137,18 @@ corresponding Unix manual entries for more information on calls.");
 #define HAVE_FSYNC      1
 #define fsync _commit
 #else
+#ifdef __MINGW32__
+#define HAVE_UNISTD_H
+#define HAVE_GETCWD     1
+#define HAVE_SPAWNV     1
+#define HAVE_EXECV      1
+#define HAVE_PIPE       1
+#define HAVE_POPEN      1
+#define HAVE_SYSTEM     1
+#define HAVE_CWAIT      1
+#define HAVE_FSYNC      1
+#define fsync _commit
+#else
 #if defined(PYOS_OS2) && defined(PYCC_GCC) || defined(__VMS)
 /* Everything needed is defined in PC/os2emx/pyconfig.h or vms/pyconfig.h */
 #else                   /* all other compilers */
@@ -163,6 +175,7 @@ corresponding Unix manual entries for more information on calls.");
 #define HAVE_TTYNAME    1
 #endif  /* PYOS_OS2 && PYCC_GCC && __VMS */
 #endif  /* _MSC_VER */
+#endif  /* __MINGW__ */
 #endif  /* __BORLANDC__ */
 #endif  /* ! __WATCOMC__ || __QNX__ */
 #endif /* ! __IBMC__ */
@@ -281,6 +294,12 @@ extern int lstat(const char *, struct stat *);
 #define popen   _popen
 #define pclose  _pclose
 #endif /* _MSC_VER */
+
+#ifdef __MINGW32__
+#include <process.h>
+#include <windows.h>
+#include "osdefs.h"
+#endif
 
 #if defined(PYCC_VACPP) && defined(PYOS_OS2)
 #include <io.h>
@@ -9478,7 +9497,7 @@ all_ins(PyObject *d)
 }
 
 
-#if (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__)) && !defined(__QNX__)
+#if (defined(_MSC_VER) || defined(__MINGW32__) || defined(__WATCOMC__) || defined(__BORLANDC__)) && !defined(__QNX__)
 #define INITFUNC initnt
 #define MODNAME "nt"
 

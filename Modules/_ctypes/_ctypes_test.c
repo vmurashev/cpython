@@ -12,10 +12,21 @@
 #include <windows.h>
 #endif
 
-#if defined(MS_WIN32) || defined(__CYGWIN__)
+#if defined(_MSC_VER)
 #define EXPORT(x) __declspec(dllexport) x
 #else
-#define EXPORT(x) x
+#define EXPORT(x) __attribute__((visibility("default"))) x
+#endif
+
+#ifdef DL_EXPORT
+#undef DL_EXPORT
+#endif
+#define DL_EXPORT(x) EXPORT(x)
+
+#if defined(_WIN32) && !defined(_WIN64) && !defined(_MSC_VER)
+#define STDCALL_XXX(x) __stdcall _##x
+#else
+#define STDCALL_XXX(x) __stdcall x
 #endif
 
 /* some functions handy for testing */
@@ -61,6 +72,15 @@ EXPORT(void)testfunc_array(int values[4])
            values[3]);
 }
 
+#ifdef _WIN32
+EXPORT(double)testfunc_Ddd(double a, double b)
+{
+    double result = (double)(a * b);
+    printf("testfunc_Ddd(%p, %p)\n", &a, &b);
+    printf("testfunc_Ddd(%g, %g)\n", a, b);
+    return result;
+}
+#else
 EXPORT(long double)testfunc_Ddd(double a, double b)
 {
     long double result = (long double)(a * b);
@@ -68,7 +88,17 @@ EXPORT(long double)testfunc_Ddd(double a, double b)
     printf("testfunc_Ddd(%g, %g)\n", a, b);
     return result;
 }
+#endif
 
+#ifdef _WIN32
+EXPORT(double)testfunc_DDD(double a, double b)
+{
+    double result = a * b;
+    printf("testfunc_DDD(%p, %p)\n", &a, &b);
+    printf("testfunc_DDD(%g, %g)\n", a, b);
+    return result;
+}
+#else
 EXPORT(long double)testfunc_DDD(long double a, long double b)
 {
     long double result = a * b;
@@ -76,6 +106,7 @@ EXPORT(long double)testfunc_DDD(long double a, long double b)
     printf("testfunc_DDD(%Lg, %Lg)\n", a, b);
     return result;
 }
+#endif
 
 EXPORT(int)testfunc_iii(int a, int b)
 {
@@ -149,6 +180,15 @@ EXPORT(double) _testfunc_d_bhilfd(signed char b, short h, int i, long l, float f
     return (double)(b + h + i + l + f + d);
 }
 
+#ifdef _WIN32
+EXPORT(double) _testfunc_D_bhilfD(signed char b, short h, int i, long l, float f, double d)
+{
+/*      printf("_testfunc_d_bhilfd got %d %d %d %ld %f %f\n",
+               b, h, i, l, f, d);
+*/
+    return (double)(b + h + i + l + f + d);
+}
+#else
 EXPORT(long double) _testfunc_D_bhilfD(signed char b, short h, int i, long l, float f, long double d)
 {
 /*      printf("_testfunc_d_bhilfd got %d %d %d %ld %f %f\n",
@@ -156,6 +196,7 @@ EXPORT(long double) _testfunc_D_bhilfD(signed char b, short h, int i, long l, fl
 */
     return (long double)(b + h + i + l + f + d);
 }
+#endif
 
 EXPORT(char *) _testfunc_p_p(void *s)
 {
@@ -471,22 +512,30 @@ EXPORT(PY_LONG_LONG) tf_q(PY_LONG_LONG c) { S; return c/3; }
 EXPORT(unsigned PY_LONG_LONG) tf_Q(unsigned PY_LONG_LONG c) { U; return c/3; }
 EXPORT(float) tf_f(float c) { S; return c/3; }
 EXPORT(double) tf_d(double c) { S; return c/3; }
+#ifdef _WIN32
+EXPORT(double) tf_D(double c) { S; return c/3; }
+#else
 EXPORT(long double) tf_D(long double c) { S; return c/3; }
+#endif
 
 #ifdef MS_WIN32
-EXPORT(signed char) __stdcall s_tf_b(signed char c) { S; return c/3; }
-EXPORT(unsigned char) __stdcall s_tf_B(unsigned char c) { U; return c/3; }
-EXPORT(short) __stdcall s_tf_h(short c) { S; return c/3; }
-EXPORT(unsigned short) __stdcall s_tf_H(unsigned short c) { U; return c/3; }
-EXPORT(int) __stdcall s_tf_i(int c) { S; return c/3; }
-EXPORT(unsigned int) __stdcall s_tf_I(unsigned int c) { U; return c/3; }
-EXPORT(long) __stdcall s_tf_l(long c) { S; return c/3; }
-EXPORT(unsigned long) __stdcall s_tf_L(unsigned long c) { U; return c/3; }
-EXPORT(PY_LONG_LONG) __stdcall s_tf_q(PY_LONG_LONG c) { S; return c/3; }
-EXPORT(unsigned PY_LONG_LONG) __stdcall s_tf_Q(unsigned PY_LONG_LONG c) { U; return c/3; }
-EXPORT(float) __stdcall s_tf_f(float c) { S; return c/3; }
-EXPORT(double) __stdcall s_tf_d(double c) { S; return c/3; }
-EXPORT(long double) __stdcall s_tf_D(long double c) { S; return c/3; }
+EXPORT(signed char) STDCALL_XXX(s_tf_b) (signed char c) { S; return c/3; }
+EXPORT(unsigned char) STDCALL_XXX(s_tf_B) (unsigned char c) { U; return c/3; }
+EXPORT(short) STDCALL_XXX(s_tf_h) (short c) { S; return c/3; }
+EXPORT(unsigned short) STDCALL_XXX(s_tf_H) (unsigned short c) { U; return c/3; }
+EXPORT(int) STDCALL_XXX(s_tf_i)(int c) { S; return c/3; }
+EXPORT(unsigned int) STDCALL_XXX(s_tf_I) (unsigned int c) { U; return c/3; }
+EXPORT(long) STDCALL_XXX(s_tf_l) (long c) { S; return c/3; }
+EXPORT(unsigned long) STDCALL_XXX(s_tf_L) (unsigned long c) { U; return c/3; }
+EXPORT(PY_LONG_LONG) STDCALL_XXX(s_tf_q) (PY_LONG_LONG c) { S; return c/3; }
+EXPORT(unsigned PY_LONG_LONG) STDCALL_XXX(s_tf_Q) (unsigned PY_LONG_LONG c) { U; return c/3; }
+EXPORT(float) STDCALL_XXX(s_tf_f) (float c) { S; return c/3; }
+EXPORT(double) STDCALL_XXX(s_tf_d) (double c) { S; return c/3; }
+#ifdef _WIN32
+EXPORT(double) STDCALL_XXX(s_tf_D) (double c) { S; return c/3; }
+#else
+EXPORT(long double) STDCALL_XXX(s_tf_D) (long double c) { S; return c/3; }
+#endif
 #endif
 /*******/
 
@@ -502,24 +551,28 @@ EXPORT(PY_LONG_LONG) tf_bq(signed char x, PY_LONG_LONG c) { S; return c/3; }
 EXPORT(unsigned PY_LONG_LONG) tf_bQ(signed char x, unsigned PY_LONG_LONG c) { U; return c/3; }
 EXPORT(float) tf_bf(signed char x, float c) { S; return c/3; }
 EXPORT(double) tf_bd(signed char x, double c) { S; return c/3; }
+#ifdef _WIN32
+EXPORT(double) tf_bD(signed char x, double c) { S; return c/3; }
+#else
 EXPORT(long double) tf_bD(signed char x, long double c) { S; return c/3; }
+#endif
 EXPORT(void) tv_i(int c) { S; return; }
 
 #ifdef MS_WIN32
-EXPORT(signed char) __stdcall s_tf_bb(signed char x, signed char c) { S; return c/3; }
-EXPORT(unsigned char) __stdcall s_tf_bB(signed char x, unsigned char c) { U; return c/3; }
-EXPORT(short) __stdcall s_tf_bh(signed char x, short c) { S; return c/3; }
-EXPORT(unsigned short) __stdcall s_tf_bH(signed char x, unsigned short c) { U; return c/3; }
-EXPORT(int) __stdcall s_tf_bi(signed char x, int c) { S; return c/3; }
-EXPORT(unsigned int) __stdcall s_tf_bI(signed char x, unsigned int c) { U; return c/3; }
-EXPORT(long) __stdcall s_tf_bl(signed char x, long c) { S; return c/3; }
-EXPORT(unsigned long) __stdcall s_tf_bL(signed char x, unsigned long c) { U; return c/3; }
-EXPORT(PY_LONG_LONG) __stdcall s_tf_bq(signed char x, PY_LONG_LONG c) { S; return c/3; }
-EXPORT(unsigned PY_LONG_LONG) __stdcall s_tf_bQ(signed char x, unsigned PY_LONG_LONG c) { U; return c/3; }
-EXPORT(float) __stdcall s_tf_bf(signed char x, float c) { S; return c/3; }
-EXPORT(double) __stdcall s_tf_bd(signed char x, double c) { S; return c/3; }
-EXPORT(long double) __stdcall s_tf_bD(signed char x, long double c) { S; return c/3; }
-EXPORT(void) __stdcall s_tv_i(int c) { S; return; }
+EXPORT(signed char) STDCALL_XXX(s_tf_bb) (signed char x, signed char c) { S; return c/3; }
+EXPORT(unsigned char) STDCALL_XXX(s_tf_bB) (signed char x, unsigned char c) { U; return c/3; }
+EXPORT(short) STDCALL_XXX(s_tf_bh) (signed char x, short c) { S; return c/3; }
+EXPORT(unsigned short) STDCALL_XXX(s_tf_bH) (signed char x, unsigned short c) { U; return c/3; }
+EXPORT(int) STDCALL_XXX(s_tf_bi) (signed char x, int c) { S; return c/3; }
+EXPORT(unsigned int) STDCALL_XXX(s_tf_bI) (signed char x, unsigned int c) { U; return c/3; }
+EXPORT(long) STDCALL_XXX(s_tf_bl) (signed char x, long c) { S; return c/3; }
+EXPORT(unsigned long) STDCALL_XXX(s_tf_bL) (signed char x, unsigned long c) { U; return c/3; }
+EXPORT(PY_LONG_LONG) STDCALL_XXX(s_tf_bq) (signed char x, PY_LONG_LONG c) { S; return c/3; }
+EXPORT(unsigned PY_LONG_LONG)STDCALL_XXX(s_tf_bQ) (signed char x, unsigned PY_LONG_LONG c) { U; return c/3; }
+EXPORT(float) STDCALL_XXX(s_tf_bf) (signed char x, float c) { S; return c/3; }
+EXPORT(double) STDCALL_XXX(s_tf_bd) (signed char x, double c) { S; return c/3; }
+EXPORT(double) STDCALL_XXX(s_tf_bD) (signed char x, double c) { S; return c/3; }
+EXPORT(void) STDCALL_XXX(s_tv_i) (int c) { S; return; }
 #endif
 
 /********/
@@ -643,8 +696,8 @@ EXPORT(void) TwoOutArgs(int a, int *pi, int b, int *pj)
 }
 
 #ifdef MS_WIN32
-EXPORT(S2H) __stdcall s_ret_2h_func(S2H inp) { return ret_2h_func(inp); }
-EXPORT(S8I) __stdcall s_ret_8i_func(S8I inp) { return ret_8i_func(inp); }
+EXPORT(S2H) STDCALL_XXX(s_ret_2h_func) (S2H inp) { return ret_2h_func(inp); }
+EXPORT(S8I) STDCALL_XXX(s_ret_8i_func) (S8I inp) { return ret_8i_func(inp); }
 #endif
 
 #ifdef MS_WIN32

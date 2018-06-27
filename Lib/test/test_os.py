@@ -8,6 +8,7 @@ import unittest
 import warnings
 import sys
 import signal
+import struct
 import subprocess
 import sysconfig
 import textwrap
@@ -328,6 +329,8 @@ class StatAttributeTests(unittest.TestCase):
     @unittest.skipUnless(sys.platform == "win32", "Win32 specific tests")
     @unittest.skipUnless(get_file_system(test_support.TESTFN) == "NTFS",
                          "requires NTFS")
+    @unittest.skipUnless('MSC' in sys.version or struct.calcsize("P") == 8,
+                         "requires MSC or x64")
     def test_large_time(self):
         t1 = 5000000000 # some day in 2128
         os.utime(self.fname, (t1, t1))
