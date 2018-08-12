@@ -8,11 +8,11 @@ class CryptTestCase(unittest.TestCase):
 
     def test_crypt(self):
         cr = crypt.crypt('mypassword')
-        cr2 = crypt.crypt('mypassword', cr)
+        cr2 = crypt.crypt('mypassword', cr if cr[0] == '$' else cr[0:2])
         self.assertEqual(cr2, cr)
         cr = crypt.crypt('mypassword', 'ab')
         if cr is not None:
-            cr2 = crypt.crypt('mypassword', cr)
+            cr2 = crypt.crypt('mypassword', cr if cr[0] == '$' else cr[0:2])
             self.assertEqual(cr2, cr)
 
     def test_salt(self):
@@ -27,7 +27,7 @@ class CryptTestCase(unittest.TestCase):
         for method in crypt.methods:
             cr = crypt.crypt('assword', method)
             self.assertEqual(len(cr), method.total_size)
-            cr2 = crypt.crypt('assword', cr)
+            cr2 = crypt.crypt('assword', cr if cr[0] == '$' else cr[0:2])
             self.assertEqual(cr2, cr)
             cr = crypt.crypt('assword', crypt.mksalt(method))
             self.assertEqual(len(cr), method.total_size)
