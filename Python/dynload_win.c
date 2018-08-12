@@ -18,23 +18,8 @@ extern ULONG_PTR _Py_ActivateActCtx();
 void _Py_DeactivateActCtx(ULONG_PTR cookie);
 #endif
 
-#ifdef _DEBUG
-#define PYD_DEBUG_SUFFIX "_d"
-#else
-#define PYD_DEBUG_SUFFIX ""
-#endif
-
-#ifdef PYD_PLATFORM_TAG
-#define PYD_TAGGED_SUFFIX PYD_DEBUG_SUFFIX ".cp" Py_STRINGIFY(PY_MAJOR_VERSION) Py_STRINGIFY(PY_MINOR_VERSION) "-" PYD_PLATFORM_TAG ".pyd"
-#else
-#define PYD_TAGGED_SUFFIX PYD_DEBUG_SUFFIX ".cp" Py_STRINGIFY(PY_MAJOR_VERSION) Py_STRINGIFY(PY_MINOR_VERSION) ".pyd"
-#endif
-
-#define PYD_UNTAGGED_SUFFIX PYD_DEBUG_SUFFIX ".pyd"
-
 const char *_PyImport_DynLoadFiletab[] = {
-    PYD_TAGGED_SUFFIX,
-    PYD_UNTAGGED_SUFFIX,
+    ".pyd",
     NULL
 };
 
@@ -147,23 +132,10 @@ static char *GetPythonImport (HINSTANCE hModule)
                 !strncmp(import_name,"python",6)) {
                 char *pch;
 
-#ifndef _DEBUG
-                /* In a release version, don't claim that python3.dll is
-                   a Python DLL. */
-                if (strcmp(import_name, "python3.dll") == 0) {
-                    import_data += 20;
-                    continue;
-                }
-#endif
-
                 /* Ensure python prefix is followed only
                    by numbers to the end of the basename */
                 pch = import_name + 6;
-#ifdef _DEBUG
-                while (*pch && pch[0] != '_' && pch[1] != 'd' && pch[2] != '.') {
-#else
                 while (*pch && *pch != '.') {
-#endif
                     if (*pch >= '0' && *pch <= '9') {
                         pch++;
                     } else {
@@ -284,11 +256,7 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
             char buffer[256];
 
             PyOS_snprintf(buffer, sizeof(buffer),
-#ifdef _DEBUG
-                          "python%d%d_d.dll",
-#else
                           "python%d%d.dll",
-#endif
                           PY_MAJOR_VERSION,PY_MINOR_VERSION);
             import_python = GetPythonImport(hDLL);
 
