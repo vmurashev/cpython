@@ -24,7 +24,7 @@ int _PyArg_ParseTupleAndKeywordsFast(PyObject *, PyObject *,
 int _PyArg_VaParseTupleAndKeywordsFast(PyObject *, PyObject *,
                                             struct _PyArg_Parser *, va_list);
 
-#ifdef HAVE_DECLSPEC_DLL
+#ifdef Py_BUILD_CORE
 /* Export functions */
 PyAPI_FUNC(int) _PyArg_Parse_SizeT(PyObject *, const char *, ...);
 PyAPI_FUNC(int) _PyArg_ParseStack_SizeT(PyObject *const *args, Py_ssize_t nargs,

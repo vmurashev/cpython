@@ -608,62 +608,32 @@ extern char * _getpty(int *, int, mode_t, int);
   we support a HAVE_DECLSPEC_DLL macro to save duplication.
 */
 
-/*
-  All windows ports, except cygwin, are handled in PC/pyconfig.h.
 
-  Cygwin is the only other autoconf platform requiring special
-  linkage handling and it uses __declspec().
-*/
-#if defined(__CYGWIN__)
-#       define HAVE_DECLSPEC_DLL
-#endif
-
-/* only get special linkage if built as shared or platform is Cygwin */
-#if defined(Py_ENABLE_SHARED) || defined(__CYGWIN__)
-#       if defined(HAVE_DECLSPEC_DLL)
-#               if defined(Py_BUILD_CORE) || defined(Py_BUILD_CORE_BUILTIN)
-#                       define PyAPI_FUNC(RTYPE) __declspec(dllexport) RTYPE
-#                       define PyAPI_DATA(RTYPE) extern __declspec(dllexport) RTYPE
-        /* module init functions inside the core need no external linkage */
-        /* except for Cygwin to handle embedding */
-#                       if defined(__CYGWIN__)
-#                               define PyMODINIT_FUNC __declspec(dllexport) PyObject*
-#                       else /* __CYGWIN__ */
-#                               define PyMODINIT_FUNC PyObject*
-#                       endif /* __CYGWIN__ */
-#               else /* Py_BUILD_CORE */
-        /* Building an extension module, or an embedded situation */
-        /* public Python functions and data are imported */
-        /* Under Cygwin, auto-import functions to prevent compilation */
-        /* failures similar to those described at the bottom of 4.1: */
-        /* http://docs.python.org/extending/windows.html#a-cookbook-approach */
-#                       if !defined(__CYGWIN__)
-#                               define PyAPI_FUNC(RTYPE) __declspec(dllimport) RTYPE
-#                       endif /* !__CYGWIN__ */
-#                       define PyAPI_DATA(RTYPE) extern __declspec(dllimport) RTYPE
-        /* module init functions outside the core must be exported */
-#                       if defined(__cplusplus)
-#                               define PyMODINIT_FUNC extern "C" __declspec(dllexport) PyObject*
-#                       else /* __cplusplus */
-#                               define PyMODINIT_FUNC __declspec(dllexport) PyObject*
-#                       endif /* __cplusplus */
-#               endif /* Py_BUILD_CORE */
-#       endif /* HAVE_DECLSPEC_DLL */
-#endif /* Py_ENABLE_SHARED */
-
-/* If no external linkage macros defined by now, create defaults */
-#ifndef PyAPI_FUNC
-#       define PyAPI_FUNC(RTYPE) RTYPE
-#endif
-#ifndef PyAPI_DATA
-#       define PyAPI_DATA(RTYPE) extern RTYPE
-#endif
-#ifndef PyMODINIT_FUNC
+#if defined(HAVE_DECLSPEC_DLL)
 #       if defined(__cplusplus)
-#               define PyMODINIT_FUNC extern "C" PyObject*
+#              define PyMODINIT_FUNC extern "C" PyObject*
 #       else /* __cplusplus */
 #               define PyMODINIT_FUNC PyObject*
 #       endif /* __cplusplus */
+#       if (defined(Py_BUILD_CORE) || defined(Py_BUILD_CORE_BUILTIN)) && defined(Py_ENABLE_SHARED)
+#              define PyAPI_FUNC(RTYPE) __declspec(dllexport) RTYPE
+#              define PyAPI_DATA(RTYPE) extern __declspec(dllexport) RTYPE
+#       else
+#              define PyAPI_FUNC(RTYPE) RTYPE
+#              if defined(Py_ENABLE_SHARED)
+#                     define PyAPI_DATA(RTYPE) extern __declspec(dllimport) RTYPE
+#              else
+#                     define PyAPI_DATA(RTYPE) extern RTYPE
+#              endif
+#        endif
+#else
+#       define PyAPI_FUNC(RTYPE) __attribute__((visibility("default"))) RTYPE
+#       define PyAPI_DATA(RTYPE) extern __attribute__((visibility("default"))) RTYPE
+#       if defined(__cplusplus)
+#             define PyMODINIT_FUNC extern "C" __attribute__((visibility("default"))) PyObject*
+#       else
+#             define PyMODINIT_FUNC __attribute__((visibility("default"))) PyObject*
+#       endif
 #endif
 
 /* limits.h constants that may be missing */
