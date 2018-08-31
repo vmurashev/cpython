@@ -37,18 +37,6 @@ class WindowsTestCase(unittest.TestCase):
 
 @unittest.skipUnless(sys.platform == "win32", 'Windows-specific test')
 class FunctionCallTestCase(unittest.TestCase):
-    @unittest.skipUnless('MSC' in sys.version, "SEH only supported by MSC")
-    @unittest.skipIf(sys.executable.lower().endswith('_d.exe'),
-                     "SEH not enabled in debug builds")
-    def test_SEH(self):
-        # Disable faulthandler to prevent logging the warning:
-        # "Windows fatal exception: access violation"
-        with support.disable_faulthandler():
-            # Call functions with invalid arguments, and make sure
-            # that access violations are trapped and raise an
-            # exception.
-            self.assertRaises(OSError, windll.kernel32.GetModuleHandleA, 32)
-
     def test_noargs(self):
         # This is a special case on win32 x64
         windll.user32.GetDesktopWindow()
