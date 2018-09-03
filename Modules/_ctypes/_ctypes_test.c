@@ -4,10 +4,10 @@
 #include <windows.h>
 #endif
 
-#if defined(MS_WIN32) || defined(__CYGWIN__)
+#if defined(_MSC_VER)
 #define EXPORT(x) __declspec(dllexport) x
 #else
-#define EXPORT(x) x
+#define EXPORT(x) __attribute__((visibility("default"))) x
 #endif
 
 /* some functions handy for testing */
