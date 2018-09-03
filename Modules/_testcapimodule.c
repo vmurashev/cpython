@@ -3012,46 +3012,6 @@ test_from_contiguous(PyObject* self, PyObject *noargs)
     Py_RETURN_NONE;
 }
 
-#if (defined(__linux__) || defined(__FreeBSD__)) && defined(__GNUC__)
-extern PyTypeObject _PyBytesIOBuffer_Type;
-
-static PyObject *
-test_pep3118_obsolete_write_locks(PyObject* self, PyObject *noargs)
-{
-    PyTypeObject *type = &_PyBytesIOBuffer_Type;
-    PyObject *b;
-    char *dummy[1];
-    int ret, match;
-
-    /* PyBuffer_FillInfo() */
-    ret = PyBuffer_FillInfo(NULL, NULL, dummy, 1, 0, PyBUF_SIMPLE);
-    match = PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_BufferError);
-    PyErr_Clear();
-    if (ret != -1 || match == 0)
-        goto error;
-
-    /* bytesiobuf_getbuffer() */
-    b = type->tp_alloc(type, 0);
-    if (b == NULL) {
-        return NULL;
-    }
-
-    ret = PyObject_GetBuffer(b, NULL, PyBUF_SIMPLE);
-    Py_DECREF(b);
-    match = PyErr_Occurred() && PyErr_ExceptionMatches(PyExc_BufferError);
-    PyErr_Clear();
-    if (ret != -1 || match == 0)
-        goto error;
-
-    Py_RETURN_NONE;
-
-error:
-    PyErr_SetString(TestError,
-        "test_pep3118_obsolete_write_locks: failure");
-    return NULL;
-}
-#endif
-
 /* This tests functions that historically supported write locks.  It is
    wrong to call getbuffer() with view==NULL and a compliant getbufferproc
    is entitled to segfault in that case. */
@@ -4592,9 +4552,6 @@ static PyMethodDef TestMethods[] = {
     {"test_unicode_compare_with_ascii", (PyCFunction)test_unicode_compare_with_ascii, METH_NOARGS},
     {"test_capsule", (PyCFunction)test_capsule, METH_NOARGS},
     {"test_from_contiguous", (PyCFunction)test_from_contiguous, METH_NOARGS},
-#if (defined(__linux__) || defined(__FreeBSD__)) && defined(__GNUC__)
-    {"test_pep3118_obsolete_write_locks", (PyCFunction)test_pep3118_obsolete_write_locks, METH_NOARGS},
-#endif
     {"getbuffer_with_null_view", getbuffer_with_null_view, METH_O},
     {"test_buildvalue_N",       test_buildvalue_N,               METH_NOARGS},
     {"get_args", get_args, METH_VARARGS},
