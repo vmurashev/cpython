@@ -648,11 +648,16 @@ class ProcessTestCase(BaseTestCase):
             return ('VERSIONER' in n or '__CF' in n or  # MacOS
                     '__PYVENV_LAUNCHER__' in n or # MacOS framework build
                     n == 'LD_PRELOAD' or n.startswith('SANDBOX') or # Gentoo
+                    n == 'LD_LIBRARY_PATH' or # Bundled solutions
                     n == 'LC_CTYPE') # Locale coercion triggered
+
+        empty_env = {}
+        if 'LD_LIBRARY_PATH' in os.environ:
+            empty_env['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH']
 
         with subprocess.Popen([sys.executable, "-c",
                                'import os; print(list(os.environ.keys()))'],
-                              stdout=subprocess.PIPE, env={}) as p:
+                              stdout=subprocess.PIPE, env=empty_env) as p:
             stdout, stderr = p.communicate()
             child_env_names = eval(stdout.strip())
             self.assertIsInstance(child_env_names, list)
